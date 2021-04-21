@@ -1,7 +1,6 @@
-shipname,hull,shield,systems,weapons,engines,fuel
+shipname,hull,shield,systems,dronebay,engines,fuel
 Delta Z7,50,75,Tier 1,none,400,
 Iota Q,175,none,Tier 2,none,350,
 Zeta R1,400,375,Tier 2,Tier 2,200,
 Delta Z9,150,150,destroyed,none,400,
-Omega L3,destroyed,destroyed,Tier 1,Tier 1,destroyed,
-
+Omega L3,0,destroyed,Tier 1,Tier 1,destroyed,
