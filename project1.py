@@ -73,8 +73,8 @@ def loadships():
 def scanner():
 	print('\nScanning....')
 	time.sleep(0.5)
-	#nearby salvage detected go there?
-	#instead of vvv this? vvv
+	if win == 1:
+		return
 	if myship.systems =='Tier 1':
 		nodes=random.randint(1,6)
 		print('Range 400:')
@@ -83,7 +83,7 @@ def scanner():
 	print('Possible Contacts Detected: {0}'.format(nodes))
 	jumpsel=pyip.inputYesNo(prompt='Jump to Possible Contact? (Y/N)')	
 	if jumpsel == 'yes':
-		jumpdrive()
+		jumpdrive(jumpcount)
 	if jumpsel == 'no':
 		return
 
@@ -108,8 +108,19 @@ def hazardroll():
 		myship.hull = myship.hull - g
 		return
 
+def winCondition():
+	clearConsole()
+	print('A large Vessel appears on the screen.\nThe radio lights up and hails you.')
+	time.sleep(0.5)
+	print('They vessel is a colony ship, fleeing this now dead area of space.')
+	time.sleep(0.5)
+	print('You learn that an unknown event caused all organinc matter to vanish.')
+	time.sleep(0.3)
+	print('You are taken on board and with the other survivors begin the long jouney to a new home')
+	
 
-def jumpdrive():
+
+def jumpdrive(jumpcount):
 	if myship.fuel > 0:
 		clearConsole()
 		time.sleep(0.2)
@@ -122,14 +133,26 @@ def jumpdrive():
 		hazardroll()
 		print('Fuel Remaining...{0}\n'.format(myship.fuel))
 		global conShip
+		jumpcount = jumpcount + 1
 		# conShip=ship.name('0')
+		if jumpcount < 10:
+			m=random.randint(1,60)
+		if jumpcount > 9 and jumpcount < 20:
+			m=random.randint(1,30)
+		if jumpcount > 19:
+			m=random.randint(1,10)
+		if m ==1:
+			winCondition()
+
+		# if win == 1:
+			return
 		if myship.systems == 'Tier 1':
 			shipcontact= random.randint(0,1)
 			if shipcontact == 1:
 				print('Nearby Ship Detected')
 				x=random.randint(1,5)
 				print(shipdata[x][0])
-				conShip=ship(shipdata[x][0],shipdata[x][1],shipdata[x][2],shipdata[x][3],shipdata[x][4],shipdata[x][5],shipdata[x][6])
+				conShip=ship(shipdata[x][0],int(shipdata[x][1]),shipdata[x][2],shipdata[x][3],shipdata[x][4],shipdata[x][5],shipdata[x][6])
 				return
 			if shipcontact == 0:
 				print('Nothing of Value nearby')
@@ -183,10 +206,12 @@ def salvage():
 		return
 	print('No life signs detected...\nBeginning Salvage Operation')
 
-	depdrone=pyip.inputYesNo(prompt='Deploy Drones? (Y/N)')
-	if depdrone == 'yes':
+	depdrone=pyip.inputMenu(['Select Drone','Deploy Drone','Return'],prompt='Selection:\n',numbered=True)
+	if depdrone == 'Select Drone':
 		droneselect()
-	if depdrone == 'no':
+	if depdrone == 'Deploy Drone':
+		dronedeploy()
+	if depdrone == 'Return':
 		return
 
 def droneselect():	
@@ -222,15 +247,17 @@ def dronedeploy():
 			print('Drone is harvesting...')
 			time.sleep(0.5)
 			q=random.randint(0,hulldiff)
-			print('Hull Plating added\nTotal harvested:{0}')
+			print('Hull Plating added\nTotal harvested:{0}'.format(q))
 			myship.hull = myship.hull + q
 			print('New hull Status: {0}'.format(myship.hull))
-		if conShip.fuel > 0
+		if conShip.fuel > 0:
 			time.sleep(0.3)
 			print('Retrieving Fuel...')
 			myship.fuel = myship.fuel + conShip.fuel
 			time.sleep(0.5)
-			print('Fuel Retrieved: {0} units now avaliable'.format(myship.fuel))
+			print('Fuel Retrieved:{0} \n{1} units now avaliable'.format(conShip.fuel,myship.fuel))
+	conShip.name='0'
+
 
 
 def systems():
@@ -280,12 +307,17 @@ mydrone1=drones('Salvage', '1')
 mydrone2=drones('Empty','0')
 mydrone3=drones('Empty','0')
 loadships()
-conShip=ship('0','0', '0', '0','0', '0', '0')
-
+conShip=ship('0', 0, '0', '0','0', '0', '0')
+global jumpcount
+jumpcount = 0
+global win
+win=0
 
 dronesel=mydrone1.dtype
-while myship.hull > 0:
-	print('Selected Drone: {0}'.format(dronesel))
+while myship.hull > 0 and myship.fuel > 0:
+	if win == 1:
+		break
+	print('\nSelected Drone: {0}'.format(dronesel))
 	menusel=pyip.inputMenu(['Check Ship Status', 'Use Ship Systems', 'Contact Nearby Ship'],prompt='What would you like to do?\n',numbered=True)
 	print(menusel)
 	if menusel == 'Check Ship Status':
@@ -294,5 +326,9 @@ while myship.hull > 0:
 		systems()
 	if menusel == 'Contact Nearby Ship':
 		salvage()
-		
-	pass
+if myship.hull < 1:
+	print('\nShip Destroyed')
+if myship.fuel == 0:
+	print('\nNo Fuel Remaining')		
+# if win == 1:
+# 	print('Good Job!')
